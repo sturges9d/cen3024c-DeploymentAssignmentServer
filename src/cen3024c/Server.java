@@ -5,11 +5,13 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Date;
 
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
+import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 
 /**
@@ -19,7 +21,7 @@ import javafx.stage.Stage;
  *
  */
 public class Server extends Application {
-
+	
 	public static boolean determinePrime(int value) {
 		boolean result = true;
 		if(value <= 1) {
@@ -38,10 +40,10 @@ public class Server extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
+		TextArea serverTextOutput = new TextArea();
 		// Connect Server.java class with ServerUI.fxml to create UI.
-		Parent root = FXMLLoader.load(getClass().getResource("ServerUI.fxml"));
-		Scene scene = new Scene(root,478,181);
-		primaryStage.setTitle("Prime Number Checker");
+		Scene scene = new Scene(new ScrollPane(serverTextOutput),480,200);
+		primaryStage.setTitle("Prime Number Checker Server");
 		primaryStage.setScene(scene);
 		primaryStage.show();
 		
@@ -53,7 +55,7 @@ public class Server extends Application {
 			try {
 				connection = new ServerSocket(1236);
 				System.out.println("Server started. Port bound. Accepting connections...");
-				
+				Platform.runLater(() -> serverTextOutput.appendText("Server started at " + new Date() + " Accepting connections...\n"));
 			} catch (Exception e) {
 				e.printStackTrace();
 				System.exit(-1);
@@ -71,6 +73,7 @@ public class Server extends Application {
 					// Receive input.
 					int clientInput = input.readInt();
 					System.out.println("Client requested: " + clientInput);
+					Platform.runLater(() -> serverTextOutput.appendText("Client requested: " + clientInput + "\n"));
 					// Calculate reply.
 					String result;
 					if (determinePrime(clientInput) == true) {
@@ -80,6 +83,7 @@ public class Server extends Application {
 					}
 					// Write to output.
 					System.out.println("Server response: " + result);
+					Platform.runLater(() -> serverTextOutput.appendText("Server response: " + result + "\n"));
 					output.write(result.getBytes());
 					
 					// Close the connection with client.
